@@ -1,6 +1,6 @@
 /*
   ESP32_LCD_ILI9341_SPI.cpp - for Arduino core for the ESP32 ( Use SPI library ).
-  Beta version 1.0
+  Beta version 1.1
   
 The MIT License (MIT)
 
@@ -132,11 +132,11 @@ void ESP32_LCD_ILI9341_SPI::XY_Range(uint16_t x0, uint16_t y0, uint16_t x1, uint
     ESP32_LCD_ILI9341_SPI::DataWrite32(Y);
 }
 //**********スクロールセットアップ*******************
-void ESP32_LCD_ILI9341_SPI::Scrolle_Font_SetUp(uint8_t num, uint8_t txt_width, uint8_t txt_length, uint8_t red, uint8_t green, uint8_t blue){
+void ESP32_LCD_ILI9341_SPI::Scrolle_Font_SetUp(uint8_t num, uint8_t txt_width, uint16_t txt_length, uint8_t red, uint8_t green, uint8_t blue){
   ESP32_LCD_ILI9341_SPI::Scrolle_Font_SetUp(num, txt_width, txt_length, 1, 1, 10, red, green, blue);
 }
 //**********スクロールセットアップ*******************
-void ESP32_LCD_ILI9341_SPI::Scrolle_Font_SetUp(uint8_t num, uint8_t txt_width, uint8_t txt_length, uint8_t H_size, uint8_t V_size, uint32_t scl_speed, uint8_t red, uint8_t green, uint8_t blue){
+void ESP32_LCD_ILI9341_SPI::Scrolle_Font_SetUp(uint8_t num, uint8_t txt_width, uint16_t txt_length, uint8_t H_size, uint8_t V_size, uint32_t scl_speed, uint8_t red, uint8_t green, uint8_t blue){
   _txt_length[num] = txt_length;
   _H_Size[num] = H_size;
   _V_Size[num] = V_size;
@@ -164,7 +164,7 @@ void ESP32_LCD_ILI9341_SPI::Scrolle_HVsizeUp_8x16_Font_DisplayOut(uint8_t num, u
   ESP32_LCD_ILI9341_SPI::Scrolle_HVsizeUp_8x16_Font_DisplayOut(num, scl_speed, H_size, V_size, &_scl_cnt[num], &_fnt_cnt[num], _txt_length[num], x0, y0, Fnt, scl_buf);
 }
 //********* スクロール ********************
-void ESP32_LCD_ILI9341_SPI::Scrolle_HVsizeUp_8x16_Font_DisplayOut(uint8_t num, uint32_t scl_speed, uint8_t H_size, uint8_t V_size, int8_t *scl_cnt, uint16_t *fnt_cnt, uint8_t txt_length, uint16_t x0, uint16_t y0, uint8_t Fnt[][16], uint8_t scl_buf[][640]){
+void ESP32_LCD_ILI9341_SPI::Scrolle_HVsizeUp_8x16_Font_DisplayOut(uint8_t num, uint32_t scl_speed, uint8_t H_size, uint8_t V_size, int8_t *scl_cnt, uint16_t *fnt_cnt, uint16_t txt_length, uint16_t x0, uint16_t y0, uint8_t Fnt[][16], uint8_t scl_buf[][640]){
   _scl_speed[num] = scl_speed;
   _H_Size[num] = H_size;
   _V_Size[num] = V_size;
@@ -231,7 +231,7 @@ void ESP32_LCD_ILI9341_SPI::Scrolle_HVsizeUp_8x16_Font_DisplayOut(uint8_t num, i
   }
 }
 //********* OLED 8x16フォント　サイズアップ　出力 ********************
-void ESP32_LCD_ILI9341_SPI::HVsizeUp_8x16_Font_DisplayOut(uint8_t H_Size, uint8_t V_Size, uint8_t txt_length, uint16_t x0, uint16_t y0, uint8_t red, uint8_t green, uint8_t blue, uint8_t Fnt[][16]){
+void ESP32_LCD_ILI9341_SPI::HVsizeUp_8x16_Font_DisplayOut(uint8_t H_Size, uint8_t V_Size, uint16_t txt_length, uint16_t x0, uint16_t y0, uint8_t red, uint8_t green, uint8_t blue, uint8_t Fnt[][16]){
   //SPI.setFrequency(27000000);
   //SPI.setDataMode(SPI_MODE0);
   //spi.setHwCs(true);
@@ -286,7 +286,7 @@ max_pixX:
   }
 }
 //********* LCD ILE9341 8x16 font 1line display out ********************
-void ESP32_LCD_ILI9341_SPI::Font_8x16_DisplayOut(uint8_t txt_length, uint16_t x0, uint16_t y0, uint8_t red, uint8_t green, uint8_t blue, uint8_t Fnt[][16]){
+void ESP32_LCD_ILI9341_SPI::Font_8x16_DisplayOut(uint16_t txt_length, uint16_t x0, uint16_t y0, uint8_t red, uint8_t green, uint8_t blue, uint8_t Fnt[][16]){
   ESP32_LCD_ILI9341_SPI::HVsizeUp_8x16_Font_DisplayOut(1, 1, txt_length, x0, y0, red, green, blue, Fnt);
 }
 //********* Display All Black Clear ******************************
