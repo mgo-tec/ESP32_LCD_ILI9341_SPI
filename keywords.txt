@@ -8,6 +8,7 @@ DataWriteBytes	KEYWORD2
 XY_Range	KEYWORD2
 Scrolle_Font_SetUp	KEYWORD2
 Scrolle_HVsizeUp_8x16_Font_DisplayOut	KEYWORD2
+Scrolle_Inc_HVsizeUp_8x16_Font_DisplayOut	KEYWORD2
 HVsizeUp_8x16_Font_DisplayOut	KEYWORD2
 Font_8x16_DisplayOut	KEYWORD2
 Display_Clear	KEYWORD2

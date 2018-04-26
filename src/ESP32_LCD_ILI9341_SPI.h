@@ -1,6 +1,6 @@
 /*
   ESP32_LCD_ILI9341_SPI.h - for Arduino core for the ESP32 ( Use SPI library ).
-  Beta version 1.1
+  Beta version 1.2
   
 The MIT License (MIT)
 
@@ -50,6 +50,8 @@ private:
 
   bool _Hw_cs;
 
+  uint32_t _freq;
+
   const uint8_t _SPI_NUM = 0x3; //VSPI=0x3, HSPI=0x2
   const uint16_t _Max_Width_x = 320;
   const uint16_t _Max_Width_y = 240;
@@ -75,6 +77,8 @@ private:
   uint16_t _fnt_cnt[ _Max_Num ] = {};
   uint32_t _scl_speed[ _Max_Num ] = {};
   uint16_t _txt_length[ _Max_Num ] = {};
+  uint8_t _txt_width = {};
+  uint16_t _zen_or_han_cnt[ _Max_Num ] = {};
 
   #define SWAP(type, x, y) do { type tmp = x; x = y; y = tmp; } while (0)
 
@@ -89,8 +93,12 @@ public:
   void DataWrite16(uint16_t b);
   void DataWrite32(uint32_t b);
   void DataWriteBytes(uint8_t *b, uint32_t b_size);
+
+  void SPI_set_change();
+
   void XY_Range(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1);
 
+  void Scrolle_Font_SetUp(uint8_t num, uint8_t txt_width, uint8_t red, uint8_t green, uint8_t blue);
   void Scrolle_Font_SetUp(uint8_t num, uint8_t txt_width, uint16_t txt_length, uint8_t red, uint8_t green, uint8_t blue);
   void Scrolle_Font_SetUp(uint8_t num, uint8_t txt_width, uint16_t txt_length, uint8_t H_size, uint8_t V_size, uint32_t scl_speed, uint8_t red, uint8_t green, uint8_t blue);
 
@@ -98,6 +106,8 @@ public:
   void Scrolle_HVsizeUp_8x16_Font_DisplayOut(uint8_t num, uint32_t scl_speed, uint8_t H_size, uint8_t V_size, uint16_t x0, uint16_t y0, uint8_t Fnt[][16], uint8_t scl_buf[][640]);
   void Scrolle_HVsizeUp_8x16_Font_DisplayOut(uint8_t num, uint32_t scl_speed, uint8_t H_size, uint8_t V_size, int8_t *scl_cnt, uint16_t *fnt_cnt, uint16_t txt_length, uint16_t x0, uint16_t y0, uint8_t Fnt[][16], uint8_t scl_buf[][640]);
   void Scrolle_HVsizeUp_8x16_Font_DisplayOut(uint8_t num, int8_t *scl_cnt, uint16_t *fnt_cnt, uint16_t x0, uint16_t y0, uint8_t Fnt[][16], uint8_t scl_buf[][640]);
+
+  boolean Scrolle_Inc_HVsizeUp_8x16_Font_DisplayOut(uint8_t num, uint8_t zen_or_han, uint32_t scl_speed, uint8_t H_size, uint8_t V_size, int8_t *scl_cnt, uint16_t txt_length, uint16_t x0, uint16_t y0, uint8_t Fnt[][16], uint8_t scl_buf[][640]);
 
   void HVsizeUp_8x16_Font_DisplayOut(uint8_t H_Size, uint8_t V_Size, uint16_t txt_length, uint16_t x0, uint16_t y0, uint8_t red, uint8_t green, uint8_t blue, uint8_t Fnt[][16]);
   void Font_8x16_DisplayOut(uint16_t txt_length, uint16_t x0, uint16_t y0, uint8_t red, uint8_t green, uint8_t blue, uint8_t Fnt[][16]);
