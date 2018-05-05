@@ -1,10 +1,15 @@
 # ESP32_LCD_ILI9341_SPI
 This is Arduino core for the ESP32 library ( SPI ).  
-Beta ver 1.2
+Beta ver 1.23
   
 Use SPI.h library  
   
 # Change log
+(1.23)  
+Added Disp_Rotation function.  
+It corresponds to the vertical installation of the display.  
+Other minor fixes.  
+  
 (1.2)  
 Added Scrolle_Inc_HVsizeUp_8x16_Font_DisplayOut function.  
 This is a function to read font character by character and scroll (to save memory).  
@@ -13,6 +18,11 @@ This is a function to read font character by character and scroll (to save memor
 Corrected the argument uint8_t txt_length to uint16_t txt_length.      
   
 【更新履歴】(Japanese)  
+(1.23)  
+Disp_Rotation 関数を追加。  
+ディスプレイの縦置きに対応しました。  
+その他、軽微な修正。  
+  
 (1.2)  
 Scrolle_Inc_HVsizeUp_8x16_Font_DisplayOut関数を追加。  
 これはフォントを１文字づつ読み込んでスクロールする関数です（メモリ節約のため、）。  

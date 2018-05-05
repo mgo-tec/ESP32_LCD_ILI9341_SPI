@@ -1,6 +1,6 @@
 /*
   ESP32_LCD_ILI9341_SPI.cpp - for Arduino core for the ESP32 ( Use SPI library ).
-  Beta version 1.2
+  Beta version 1.23
   
 The MIT License (MIT)
 
@@ -99,6 +99,31 @@ void ESP32_LCD_ILI9341_SPI::ILI9341_Init(bool hwcs, uint32_t clk){
 
   if(!_Hw_cs) digitalWrite(_cs, HIGH);
   ESP32_LCD_ILI9341_SPI::Brightness(100);
+}
+//********* 4wire SPI Data / Command write************
+void ESP32_LCD_ILI9341_SPI::Disp_Rotation(uint8_t rot){
+  uint8_t b = 0b0001000;
+  switch( rot ){
+    case 0:
+      b = 0b0001000;
+      _Max_Width_x = 320;
+      _Max_Width_y = 240;
+      break;
+    case 1:
+      b = 0b10101000;
+      _Max_Width_x = 240;
+      _Max_Width_y = 320;
+      break;
+    default:
+      break;
+  }
+  _Max_Pix_X = _Max_Width_x - 1;
+  _Max_Pix_Y = _Max_Width_y - 1;
+  _txt_H_max = _Max_Width_x / 8;
+  ESP32_LCD_ILI9341_SPI::SPI_set_change();
+  ESP32_LCD_ILI9341_SPI::CommandWrite(0x36); //MADCTL: Memory Access Control
+    ESP32_LCD_ILI9341_SPI::DataWrite(b); //M5stack only. D3: BGR(RGB-BGR Order control bit )="1"
+  if(!_Hw_cs) digitalWrite(_cs, HIGH);
 }
 //********* 4wire SPI Data / Command write************
 void ESP32_LCD_ILI9341_SPI::CommandWrite(uint8_t b){
@@ -308,11 +333,12 @@ max_pixX:
     for(jj = 0; jj < V_Size; jj++){
       ESP32_LCD_ILI9341_SPI::DataWriteBytes(disp_byte, byte_cnt);
       Y_pix_cnt++;
-      if(Y_pix_cnt > _Max_Pix_Y) return;
+      if(Y_pix_cnt > _Max_Pix_Y) goto exit;
     }
     X_pix_cnt = x0;
     byte_cnt = 0;
   }
+exit:
   if(!_Hw_cs) digitalWrite(_cs, HIGH);
 }
 //********* LCD ILE9341 8x16 font 1line display out ********************
@@ -325,10 +351,10 @@ void ESP32_LCD_ILI9341_SPI::Display_Clear(){
 }
 //********* Display All Black Clear ******************************
 void ESP32_LCD_ILI9341_SPI::Display_Clear(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1){
-  if( x0 >= _Max_Width_x ) x0 = _Max_Pix_X;
-  if( y0 >= _Max_Width_y ) y0 = _Max_Pix_Y;
-  if( x1 >= _Max_Width_x ) x1 = _Max_Pix_X;
-  if( y1 >= _Max_Width_y ) y1 = _Max_Pix_Y;
+  if( x0 > _Max_Pix_X ) x0 = _Max_Pix_X;
+  if( y0 > _Max_Pix_Y ) y0 = _Max_Pix_Y;
+  if( x1 > _Max_Pix_X ) x1 = _Max_Pix_X;
+  if( y1 > _Max_Pix_Y ) y1 = _Max_Pix_Y;
   uint32_t Total_Pixels = (x1 - x0 + 1) * (y1 - y0 + 1) ;
   ESP32_LCD_ILI9341_SPI::Block_SPI_Fast_Write(x0, y0, x1, y1, 0, 0, 0, Total_Pixels);
 }

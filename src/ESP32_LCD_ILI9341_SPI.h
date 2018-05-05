@@ -1,6 +1,6 @@
 /*
   ESP32_LCD_ILI9341_SPI.h - for Arduino core for the ESP32 ( Use SPI library ).
-  Beta version 1.2
+  Beta version 1.23
   
 The MIT License (MIT)
 
@@ -53,15 +53,13 @@ private:
   uint32_t _freq;
 
   const uint8_t _SPI_NUM = 0x3; //VSPI=0x3, HSPI=0x2
-  const uint16_t _Max_Width_x = 320;
-  const uint16_t _Max_Width_y = 240;
-  #define _Max_Num 5
+  uint16_t _Max_Width_x = 320;
+  uint16_t _Max_Width_y = 240;
+  #define _Max_Num 10
 
   uint16_t _Max_Pix_X = _Max_Width_x - 1;
   uint16_t _Max_Pix_Y = _Max_Width_y - 1;
   uint8_t _txt_H_max = _Max_Width_x / 8;
-  uint16_t _Max_X_2byte = _Max_Width_x * 2;
-  uint16_t _Max_X_2byte_1 = _Max_X_2byte - 1;
 
   uint8_t _H_Size[_Max_Num];
   uint8_t _V_Size[_Max_Num];
@@ -86,6 +84,7 @@ public:
   ESP32_LCD_ILI9341_SPI(int8_t sck, int8_t miso, int8_t mosi, int8_t cs, int8_t dc, int8_t rst, int8_t led);
 
   void ILI9341_Init();
+  void Disp_Rotation(uint8_t rot);
   void ILI9341_Init(uint32_t clk);
   void ILI9341_Init(bool hwcs, uint32_t clk);
   void CommandWrite(uint8_t b);
