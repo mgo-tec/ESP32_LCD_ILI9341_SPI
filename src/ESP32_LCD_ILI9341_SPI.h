@@ -1,6 +1,6 @@
 /*
   ESP32_LCD_ILI9341_SPI.h - for Arduino core for the ESP32 ( Use SPI library ).
-  Beta version 1.23
+  Beta version 1.25
   
 The MIT License (MIT)
 
@@ -65,6 +65,8 @@ private:
   uint8_t _V_Size[_Max_Num];
   uint8_t _Dot_MSB[_Max_Num] = {};
   uint8_t _Dot_LSB[_Max_Num] = {};
+  uint8_t _BG_Dot_MSB[_Max_Num] = {};
+  uint8_t _BG_Dot_LSB[_Max_Num] = {};
   uint16_t _scl_pix_cnt[_Max_Num] = {};
   uint16_t _prev_scl_pix_cnt[_Max_Num] = {};
   uint16_t _H_pix_max[_Max_Num];
@@ -77,6 +79,8 @@ private:
   uint16_t _txt_length[ _Max_Num ] = {};
   uint8_t _txt_width = {};
   uint16_t _zen_or_han_cnt[ _Max_Num ] = {};
+
+  uint16_t _X0, _Y0 = {};
 
   #define SWAP(type, x, y) do { type tmp = x; x = y; y = tmp; } while (0)
 
@@ -97,25 +101,33 @@ public:
 
   void XY_Range(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1);
 
-  void Scrolle_Font_SetUp(uint8_t num, uint8_t txt_width, uint8_t red, uint8_t green, uint8_t blue);
-  void Scrolle_Font_SetUp(uint8_t num, uint8_t txt_width, uint16_t txt_length, uint8_t red, uint8_t green, uint8_t blue);
-  void Scrolle_Font_SetUp(uint8_t num, uint8_t txt_width, uint16_t txt_length, uint8_t H_size, uint8_t V_size, uint32_t scl_speed, uint8_t red, uint8_t green, uint8_t blue);
+  void Scrolle_Font_SetUp(uint8_t num, uint8_t txt_width, uint8_t red, uint8_t green, uint8_t blue, uint8_t bg_red = 0, uint8_t bg_green = 0, uint8_t bg_blue = 0, uint16_t x0 = 0, uint16_t y0 = 0, uint8_t H_size = 1, uint8_t V_size = 1, bool xy_range_set = false );
+  void Scrolle_Font_SetUp(uint8_t num, uint8_t txt_width, uint16_t txt_length, uint8_t red, uint8_t green, uint8_t blue, uint8_t bg_red = 0, uint8_t bg_green = 0, uint8_t bg_blue = 0, uint16_t x0 = 0, uint16_t y0 = 0, uint8_t H_size = 1, uint8_t V_size = 1, bool xy_range_set = false );
+  void Scrolle_Font_SetUp(uint8_t num, uint8_t txt_width, uint16_t txt_length, uint8_t H_size, uint8_t V_size, uint32_t scl_speed, uint8_t red, uint8_t green, uint8_t blue, uint8_t bg_red = 0, uint8_t bg_green = 0, uint8_t bg_blue = 0, bool xy_range_set = false);
+
+  void Scrolle_XYrange_Com_Change(uint8_t num);
+  void Scrolle_XYrange_Com_Change(uint8_t num, uint16_t x0, uint16_t y0);
+
+  void Scrolle_HVsizeUp_8x16_Font_DisplayOut(uint8_t num, uint32_t scl_speed, uint8_t H_size, uint8_t V_size, uint8_t Fnt[][16], uint8_t scl_buf[][640]);
 
   void Scrolle_HVsizeUp_8x16_Font_DisplayOut(uint8_t num, uint16_t x0, uint16_t y0, uint8_t Fnt[][16], uint8_t scl_buf[][640]);
   void Scrolle_HVsizeUp_8x16_Font_DisplayOut(uint8_t num, uint32_t scl_speed, uint8_t H_size, uint8_t V_size, uint16_t x0, uint16_t y0, uint8_t Fnt[][16], uint8_t scl_buf[][640]);
-  void Scrolle_HVsizeUp_8x16_Font_DisplayOut(uint8_t num, uint32_t scl_speed, uint8_t H_size, uint8_t V_size, int8_t *scl_cnt, uint16_t *fnt_cnt, uint16_t txt_length, uint16_t x0, uint16_t y0, uint8_t Fnt[][16], uint8_t scl_buf[][640]);
-  void Scrolle_HVsizeUp_8x16_Font_DisplayOut(uint8_t num, int8_t *scl_cnt, uint16_t *fnt_cnt, uint16_t x0, uint16_t y0, uint8_t Fnt[][16], uint8_t scl_buf[][640]);
+  void Scrolle_HVsizeUp_8x16_Font_DisplayOut(uint8_t num, uint32_t scl_speed, uint8_t H_size, uint8_t V_size, int8_t *scl_cnt, uint16_t *fnt_cnt, uint16_t txt_length, uint16_t x0, uint16_t y0, uint8_t Fnt[][16], uint8_t scl_buf[][640], bool xy_range_set = true);
+  void Scrolle_HVsizeUp_8x16_Font_DisplayOut(uint8_t num, int8_t *scl_cnt, uint16_t *fnt_cnt, uint16_t x0, uint16_t y0, uint8_t Fnt[][16], uint8_t scl_buf[][640], bool xy_range_set = true);
 
-  boolean Scrolle_Inc_HVsizeUp_8x16_Font_DisplayOut(uint8_t num, uint8_t zen_or_han, uint32_t scl_speed, uint8_t H_size, uint8_t V_size, int8_t *scl_cnt, uint16_t txt_length, uint16_t x0, uint16_t y0, uint8_t Fnt[][16], uint8_t scl_buf[][640]);
+  boolean Scrolle_Inc_HVsizeUp_8x16_Font_DisplayOut(uint8_t num, uint8_t zen_or_han, uint32_t scl_speed, uint8_t H_size, uint8_t V_size, int8_t *scl_cnt, uint16_t txt_length, uint8_t Fnt[][16], uint8_t scl_buf[][640]);
+  boolean Scrolle_Inc_HVsizeUp_8x16_Font_DisplayOut(uint8_t num, uint8_t zen_or_han, uint32_t scl_speed, uint8_t H_size, uint8_t V_size, int8_t *scl_cnt, uint16_t txt_length, uint16_t x0, uint16_t y0, uint8_t Fnt[][16], uint8_t scl_buf[][640], bool xy_range_set = true);
 
-  void HVsizeUp_8x16_Font_DisplayOut(uint8_t H_Size, uint8_t V_Size, uint16_t txt_length, uint16_t x0, uint16_t y0, uint8_t red, uint8_t green, uint8_t blue, uint8_t Fnt[][16]);
+  void HVsizeUp_8x16_Font_DisplayOut(uint8_t H_Size, uint8_t V_Size, uint16_t txt_length, uint16_t x0, uint16_t y0, uint8_t red, uint8_t green, uint8_t blue, uint8_t Fnt[][16], uint8_t bg_red = 0, uint8_t bg_green = 0, uint8_t bg_blue = 0 );
   void Font_8x16_DisplayOut(uint16_t txt_length, uint16_t x0, uint16_t y0, uint8_t red, uint8_t green, uint8_t blue, uint8_t Fnt[][16]);
 
   void Display_Clear();
   void Display_Clear(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1);
   void spiWriteBlock(uint16_t color, uint32_t repeat);
   void Block_SPI_Fast_Write(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint8_t red, uint8_t green, uint8_t blue, uint32_t repeat);
+  void Draw_Pixel_65k_DotColor_sd(uint16_t x0, uint16_t y0, uint16_t DotColor);
   void Draw_Pixel_65k_DotColor(uint16_t x0, uint16_t y0, uint16_t DotColor);
+  void Draw_Pixel_65k_3Color_sd(uint16_t x0, uint16_t y0, uint8_t red, uint8_t green, uint8_t blue);
   void Draw_Pixel_65k_3Color(uint16_t x0, uint16_t y0, uint8_t red, uint8_t green, uint8_t blue);
   void Draw_Line(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t red, uint8_t green, uint8_t blue);
   void Draw_Horizontal_Line(int16_t x0, int16_t x1, int16_t y0, uint8_t red, uint8_t green, uint8_t blue);

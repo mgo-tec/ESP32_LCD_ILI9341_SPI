@@ -15,13 +15,15 @@ Font_8x16_DisplayOut	KEYWORD2
 Display_Clear	KEYWORD2
 spiWriteBlock	KEYWORD2
 Block_SPI_Fast_Write	KEYWORD2
+Draw_Pixel_65k_DotColor_sd	KEYWORD2
 Draw_Pixel_65k_DotColor	KEYWORD2
+Draw_Pixel_65k_3Color_sd	KEYWORD2
 Draw_Pixel_65k_3Color	KEYWORD2
 Draw_Line	KEYWORD2
 Draw_Horizontal_Line	KEYWORD2
 Draw_Vertical_Line	KEYWORD2
 Draw_Rectangle_Line	KEYWORD2
-Draw_Rectangle_Fill_65kColor	KEYWORD2
+Draw_Rectangle_Fill	KEYWORD2
 Draw_Circle_Line	KEYWORD2
 Draw_Circle_Fill	KEYWORD2
 Brightness	KEYWORD2

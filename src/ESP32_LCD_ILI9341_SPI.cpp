@@ -1,6 +1,6 @@
 /*
   ESP32_LCD_ILI9341_SPI.cpp - for Arduino core for the ESP32 ( Use SPI library ).
-  Beta version 1.23
+  Beta version 1.25
   
 The MIT License (MIT)
 
@@ -165,21 +165,30 @@ void ESP32_LCD_ILI9341_SPI::XY_Range(uint16_t x0, uint16_t y0, uint16_t x1, uint
     ESP32_LCD_ILI9341_SPI::DataWrite32(Y);
 }
 //**********スクロールセットアップ*******************
-void ESP32_LCD_ILI9341_SPI::Scrolle_Font_SetUp(uint8_t num, uint8_t txt_width, uint8_t red, uint8_t green, uint8_t blue){
-  ESP32_LCD_ILI9341_SPI::Scrolle_Font_SetUp(num, txt_width, 40, 1, 1, 10, red, green, blue);
+void ESP32_LCD_ILI9341_SPI::Scrolle_Font_SetUp(uint8_t num, uint8_t txt_width, uint8_t red, uint8_t green, uint8_t blue, uint8_t bg_red, uint8_t bg_green, uint8_t bg_blue, uint16_t x0, uint16_t y0, uint8_t H_size, uint8_t V_size, bool xy_range_set ){
+  _X0 = x0;
+  _Y0 = y0;
+  ESP32_LCD_ILI9341_SPI::Scrolle_Font_SetUp(num, txt_width, 40, H_size, V_size, 10, red, green, blue, bg_red, bg_green, bg_blue, xy_range_set);
 }
 //**********スクロールセットアップ*******************
-void ESP32_LCD_ILI9341_SPI::Scrolle_Font_SetUp(uint8_t num, uint8_t txt_width, uint16_t txt_length, uint8_t red, uint8_t green, uint8_t blue){
-  ESP32_LCD_ILI9341_SPI::Scrolle_Font_SetUp(num, txt_width, txt_length, 1, 1, 10, red, green, blue);
+void ESP32_LCD_ILI9341_SPI::Scrolle_Font_SetUp(uint8_t num, uint8_t txt_width, uint16_t txt_length, uint8_t red, uint8_t green, uint8_t blue, uint8_t bg_red, uint8_t bg_green, uint8_t bg_blue, uint16_t x0, uint16_t y0, uint8_t H_size, uint8_t V_size, bool xy_range_set ){
+  _X0 = x0;
+  _Y0 = y0;
+  ESP32_LCD_ILI9341_SPI::Scrolle_Font_SetUp(num, txt_width, txt_length, H_size, V_size, 10, red, green, blue, bg_red, bg_green, bg_blue, xy_range_set);
 }
 //**********スクロールセットアップ*******************
-void ESP32_LCD_ILI9341_SPI::Scrolle_Font_SetUp(uint8_t num, uint8_t txt_width, uint16_t txt_length, uint8_t H_size, uint8_t V_size, uint32_t scl_speed, uint8_t red, uint8_t green, uint8_t blue){
+void ESP32_LCD_ILI9341_SPI::Scrolle_Font_SetUp(uint8_t num, uint8_t txt_width, uint16_t txt_length, uint8_t H_size, uint8_t V_size, uint32_t scl_speed, uint8_t red, uint8_t green, uint8_t blue, uint8_t bg_red, uint8_t bg_green, uint8_t bg_blue, bool xy_range_set){
   _txt_length[num] = txt_length;
   _H_Size[num] = H_size;
   _V_Size[num] = V_size;
 
   _Dot_MSB[num] = (red << 3) | (green >> 3);
   _Dot_LSB[num] = (green << 5) | blue;
+
+  if( (bg_red + bg_green + bg_blue) != 0 ){
+    _BG_Dot_MSB[num] = (bg_red << 3) | (bg_green >> 3);
+    _BG_Dot_LSB[num] = (bg_green << 5) | bg_blue;
+  }
 
   if(_H_Size[num] > 15) _H_Size[num] = 15;
   if(_V_Size[num] > 15) _V_Size[num] = 15;
@@ -193,6 +202,28 @@ void ESP32_LCD_ILI9341_SPI::Scrolle_Font_SetUp(uint8_t num, uint8_t txt_width, u
   if( _tmp_width1[num] > _Max_Width_x ) _tmp_width1[num] = _Max_Width_x;
 
   _H_pix_max[num] = _tmp_width1[num] - 1;
+
+  if( xy_range_set ){
+    ESP32_LCD_ILI9341_SPI::SPI_set_change();
+    ESP32_LCD_ILI9341_SPI::XY_Range(_X0, _Y0, _X0 + _H_pix_max[num], _Y0 + 16 * _V_Size[num] - 1);
+    ESP32_LCD_ILI9341_SPI::CommandWrite( 0x2C ); //RAM write
+    if(!_Hw_cs) digitalWrite(_cs, HIGH);
+  }
+}
+//********* Scrolle X-Y Range Command Chagne *********
+void ESP32_LCD_ILI9341_SPI::Scrolle_XYrange_Com_Change(uint8_t num){
+  ESP32_LCD_ILI9341_SPI::Scrolle_XYrange_Com_Change(num, _X0, _Y0);
+}
+//********* Scrolle X-Y Range Command Chagne *********
+void ESP32_LCD_ILI9341_SPI::Scrolle_XYrange_Com_Change(uint8_t num, uint16_t x0, uint16_t y0){
+  ESP32_LCD_ILI9341_SPI::SPI_set_change();
+  ESP32_LCD_ILI9341_SPI::XY_Range(x0, y0, x0 + _H_pix_max[num], y0 + 16 * _V_Size[num] - 1);
+  ESP32_LCD_ILI9341_SPI::CommandWrite( 0x2C ); //RAM write
+  if(!_Hw_cs) digitalWrite(_cs, HIGH);
+}
+//********* FAST スクロール ********************
+void ESP32_LCD_ILI9341_SPI::Scrolle_HVsizeUp_8x16_Font_DisplayOut(uint8_t num, uint32_t scl_speed, uint8_t H_size, uint8_t V_size, uint8_t Fnt[][16], uint8_t scl_buf[][640]){
+  ESP32_LCD_ILI9341_SPI::Scrolle_HVsizeUp_8x16_Font_DisplayOut(num, scl_speed, H_size, V_size, &_scl_cnt[num], &_fnt_cnt[num], _txt_length[num], _X0, _Y0, Fnt, scl_buf, true);
 }
 //********* スクロール ********************
 void ESP32_LCD_ILI9341_SPI::Scrolle_HVsizeUp_8x16_Font_DisplayOut(uint8_t num, uint16_t x0, uint16_t y0, uint8_t Fnt[][16], uint8_t scl_buf[][640]){
@@ -203,7 +234,7 @@ void ESP32_LCD_ILI9341_SPI::Scrolle_HVsizeUp_8x16_Font_DisplayOut(uint8_t num, u
   ESP32_LCD_ILI9341_SPI::Scrolle_HVsizeUp_8x16_Font_DisplayOut(num, scl_speed, H_size, V_size, &_scl_cnt[num], &_fnt_cnt[num], _txt_length[num], x0, y0, Fnt, scl_buf);
 }
 //********* スクロール ********************
-void ESP32_LCD_ILI9341_SPI::Scrolle_HVsizeUp_8x16_Font_DisplayOut(uint8_t num, uint32_t scl_speed, uint8_t H_size, uint8_t V_size, int8_t *scl_cnt, uint16_t *fnt_cnt, uint16_t txt_length, uint16_t x0, uint16_t y0, uint8_t Fnt[][16], uint8_t scl_buf[][640]){
+void ESP32_LCD_ILI9341_SPI::Scrolle_HVsizeUp_8x16_Font_DisplayOut(uint8_t num, uint32_t scl_speed, uint8_t H_size, uint8_t V_size, int8_t *scl_cnt, uint16_t *fnt_cnt, uint16_t txt_length, uint16_t x0, uint16_t y0, uint8_t Fnt[][16], uint8_t scl_buf[][640], bool xy_range_set){
   _scl_speed[num] = scl_speed;
   _H_Size[num] = H_size;
   _V_Size[num] = V_size;
@@ -212,18 +243,21 @@ void ESP32_LCD_ILI9341_SPI::Scrolle_HVsizeUp_8x16_Font_DisplayOut(uint8_t num, u
   if( _tmp_width1[num] > _Max_Width_x ) _tmp_width1[num] = _Max_Width_x;
   _H_pix_max[num] = _tmp_width1[num] - 1;
 
-  ESP32_LCD_ILI9341_SPI::Scrolle_HVsizeUp_8x16_Font_DisplayOut(num, scl_cnt, fnt_cnt, x0, y0, Fnt, scl_buf);
+  ESP32_LCD_ILI9341_SPI::Scrolle_HVsizeUp_8x16_Font_DisplayOut(num, scl_cnt, fnt_cnt, x0, y0, Fnt, scl_buf, xy_range_set);
 }
+
 //********* スクロール ********************
-void ESP32_LCD_ILI9341_SPI::Scrolle_HVsizeUp_8x16_Font_DisplayOut(uint8_t num, int8_t *scl_cnt, uint16_t *fnt_cnt, uint16_t x0, uint16_t y0, uint8_t Fnt[][16], uint8_t scl_buf[][640]){
+void ESP32_LCD_ILI9341_SPI::Scrolle_HVsizeUp_8x16_Font_DisplayOut(uint8_t num, int8_t *scl_cnt, uint16_t *fnt_cnt, uint16_t x0, uint16_t y0, uint8_t Fnt[][16], uint8_t scl_buf[][640], bool xy_range_set){
   if( millis() - _scl_LastTime[num] > _scl_speed[num]){
     ESP32_LCD_ILI9341_SPI::SPI_set_change();
     uint16_t array_max = (_tmp_width1[num] ) * 2;
     uint8_t bt1 = 0b10000000;
     int i, j;
 
-    ESP32_LCD_ILI9341_SPI::XY_Range(x0, y0, x0 + _H_pix_max[num], y0 + 16 * _V_Size[num] - 1);
-    ESP32_LCD_ILI9341_SPI::CommandWrite( 0x2C ); //RAM write
+    if( xy_range_set ){
+      ESP32_LCD_ILI9341_SPI::XY_Range(x0, y0, x0 + _H_pix_max[num], y0 + 16 * _V_Size[num] - 1);
+      ESP32_LCD_ILI9341_SPI::CommandWrite( 0x2C ); //RAM write
+    }
 
     uint16_t b2 = array_max - _scl_pix_cnt[num];
     for(i = 0; i < 16; i++){
@@ -250,8 +284,8 @@ void ESP32_LCD_ILI9341_SPI::Scrolle_HVsizeUp_8x16_Font_DisplayOut(uint8_t num, i
         }
       }else{
         for( j = _H_Size[num]; j > 0; j-- ){
-          scl_buf[i][count++] = 0;
-          scl_buf[i][count++] = 0;
+          scl_buf[i][count++] = _BG_Dot_MSB[num];
+          scl_buf[i][count++] = _BG_Dot_LSB[num];
           if(count >= array_max) break;
         }
       }
@@ -270,11 +304,15 @@ void ESP32_LCD_ILI9341_SPI::Scrolle_HVsizeUp_8x16_Font_DisplayOut(uint8_t num, i
     if(!_Hw_cs) digitalWrite(_cs, HIGH);
   }
 }
+//********* FAST 1文字づつ読み込みスクロール ********************
+boolean ESP32_LCD_ILI9341_SPI::Scrolle_Inc_HVsizeUp_8x16_Font_DisplayOut(uint8_t num, uint8_t zen_or_han, uint32_t scl_speed, uint8_t H_size, uint8_t V_size, int8_t *scl_cnt, uint16_t txt_length, uint8_t Fnt[][16], uint8_t scl_buf[][640]){
+  return ESP32_LCD_ILI9341_SPI::Scrolle_Inc_HVsizeUp_8x16_Font_DisplayOut(num, zen_or_han, scl_speed, H_size, V_size, scl_cnt, txt_length, _X0, _Y0, Fnt, scl_buf, false);
+}
 //********* 1文字づつ読み込みスクロール ********************
-boolean ESP32_LCD_ILI9341_SPI::Scrolle_Inc_HVsizeUp_8x16_Font_DisplayOut(uint8_t num, uint8_t zen_or_han, uint32_t scl_speed, uint8_t H_size, uint8_t V_size, int8_t *scl_cnt, uint16_t txt_length, uint16_t x0, uint16_t y0, uint8_t Fnt[][16], uint8_t scl_buf[][640]){
+boolean ESP32_LCD_ILI9341_SPI::Scrolle_Inc_HVsizeUp_8x16_Font_DisplayOut(uint8_t num, uint8_t zen_or_han, uint32_t scl_speed, uint8_t H_size, uint8_t V_size, int8_t *scl_cnt, uint16_t txt_length, uint16_t x0, uint16_t y0, uint8_t Fnt[][16], uint8_t scl_buf[][640], bool xy_range_set){
   boolean ret = false;
 
-  ESP32_LCD_ILI9341_SPI::Scrolle_HVsizeUp_8x16_Font_DisplayOut(num, scl_speed, H_size, V_size, scl_cnt, &_zen_or_han_cnt[ num ], txt_length, x0, y0, Fnt, scl_buf);
+  ESP32_LCD_ILI9341_SPI::Scrolle_HVsizeUp_8x16_Font_DisplayOut(num, scl_speed, H_size, V_size, scl_cnt, &_zen_or_han_cnt[ num ], txt_length, x0, y0, Fnt, scl_buf, xy_range_set);
 
   if((zen_or_han == 2) && (_zen_or_han_cnt[ num ] == 2)){
     _zen_or_han_cnt[ num ] = 0;
@@ -286,8 +324,8 @@ boolean ESP32_LCD_ILI9341_SPI::Scrolle_Inc_HVsizeUp_8x16_Font_DisplayOut(uint8_t
 
   return ret;
 }
-//********* OLED 8x16フォント　サイズアップ　出力 ********************
-void ESP32_LCD_ILI9341_SPI::HVsizeUp_8x16_Font_DisplayOut(uint8_t H_Size, uint8_t V_Size, uint16_t txt_length, uint16_t x0, uint16_t y0, uint8_t red, uint8_t green, uint8_t blue, uint8_t Fnt[][16]){
+//********* OLED 8x16フォント　サイズアップ　出力 バックグラウンドカラー有り********************
+void ESP32_LCD_ILI9341_SPI::HVsizeUp_8x16_Font_DisplayOut(uint8_t H_Size, uint8_t V_Size, uint16_t txt_length, uint16_t x0, uint16_t y0, uint8_t red, uint8_t green, uint8_t blue, uint8_t Fnt[][16], uint8_t bg_red, uint8_t bg_green, uint8_t bg_blue ){
   ESP32_LCD_ILI9341_SPI::SPI_set_change();
 
   if(H_Size > 16) H_Size = 16;
@@ -299,6 +337,14 @@ void ESP32_LCD_ILI9341_SPI::HVsizeUp_8x16_Font_DisplayOut(uint8_t H_Size, uint8_
   uint8_t bt = 0b00000001;
   uint8_t dot_MSB = (red << 3) | (green >> 3);
   uint8_t dot_LSB = (green << 5) | blue;
+
+  uint8_t bg_dot_MSB = 0;
+  uint8_t bg_dot_LSB = 0;
+  if( (bg_red + bg_green + bg_blue) != 0 ){
+    bg_dot_MSB = (bg_red << 3) | (bg_green >> 3);
+    bg_dot_LSB = (bg_green << 5) | bg_blue;
+  }
+
   uint8_t disp_byte[(txt_length * 8 * H_Size) * 2] = {};
   uint16_t byte_cnt = 0;
   uint16_t X_pix_cnt = x0, Y_pix_cnt = y0;
@@ -317,8 +363,8 @@ void ESP32_LCD_ILI9341_SPI::HVsizeUp_8x16_Font_DisplayOut(uint8_t H_Size, uint8_
           }
         }else{
           for(ii = H_Size; ii > 0; ii--){
-            disp_byte[byte_cnt++] = 0;
-            disp_byte[byte_cnt++] = 0;
+            disp_byte[byte_cnt++] = bg_dot_MSB;
+            disp_byte[byte_cnt++] = bg_dot_LSB;
             X_pix_cnt++;
             if(X_pix_cnt > _Max_Pix_X) goto max_pixX;
           }
@@ -399,11 +445,23 @@ void ESP32_LCD_ILI9341_SPI::spiWriteBlock(uint16_t color, uint32_t repeat) {
       ;
   }
 }
+//*********** 65k Color Pixel (Dot) Write ( SD card use )*************
+void ESP32_LCD_ILI9341_SPI::Draw_Pixel_65k_DotColor_sd(uint16_t x0, uint16_t y0, uint16_t DotColor){
+  ESP32_LCD_ILI9341_SPI::SPI_set_change();
+  ESP32_LCD_ILI9341_SPI::Draw_Pixel_65k_DotColor(x0, y0, DotColor);
+  if(!_Hw_cs) digitalWrite(_cs, HIGH);
+}
 //*********** 65k Color Pixel (Dot) Write ****************************
 void ESP32_LCD_ILI9341_SPI::Draw_Pixel_65k_DotColor(uint16_t x0, uint16_t y0, uint16_t DotColor){
   ESP32_LCD_ILI9341_SPI::XY_Range(x0, y0, x0, y0);
   ESP32_LCD_ILI9341_SPI::CommandWrite( 0x2C ); //RAM write
   ESP32_LCD_ILI9341_SPI::DataWrite16( DotColor );
+}
+//*********** 65k Pixel RGB color Write ( SD card use )****************************
+void ESP32_LCD_ILI9341_SPI::Draw_Pixel_65k_3Color_sd(uint16_t x0, uint16_t y0, uint8_t red, uint8_t green, uint8_t blue){
+  ESP32_LCD_ILI9341_SPI::SPI_set_change();
+  ESP32_LCD_ILI9341_SPI::Draw_Pixel_65k_3Color(x0, y0, red, green, blue);
+  if(!_Hw_cs) digitalWrite(_cs, HIGH);
 }
 //*********** 65k Pixel RGB color Write ****************************
 void ESP32_LCD_ILI9341_SPI::Draw_Pixel_65k_3Color(uint16_t x0, uint16_t y0, uint8_t red, uint8_t green, uint8_t blue){
@@ -436,6 +494,7 @@ void ESP32_LCD_ILI9341_SPI::Draw_Vertical_Line(int16_t x0, int16_t y0, int16_t y
 }
 //***************************************
 void ESP32_LCD_ILI9341_SPI::Draw_Line(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t red, uint8_t green, uint8_t blue){
+  ESP32_LCD_ILI9341_SPI::SPI_set_change();
   int i;
   int16_t Y = 0, X = 0;
   int16_t length_x = x1 - x0;
@@ -471,6 +530,7 @@ void ESP32_LCD_ILI9341_SPI::Draw_Line(int16_t x0, int16_t y0, int16_t x1, int16_
       }
     }
   }
+  if(!_Hw_cs) digitalWrite(_cs, HIGH);
 }
 //***************************************
 void ESP32_LCD_ILI9341_SPI::Draw_Rectangle_Fill(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint8_t red, uint8_t green, uint8_t blue){
@@ -481,6 +541,7 @@ void ESP32_LCD_ILI9341_SPI::Draw_Rectangle_Fill(uint16_t x0, uint16_t y0, uint16
 }
 //***************************************
 void ESP32_LCD_ILI9341_SPI::Draw_Circle_Line(uint16_t x0, uint16_t y0, uint16_t r, uint8_t red, uint8_t green, uint8_t blue){
+  ESP32_LCD_ILI9341_SPI::SPI_set_change();
   uint16_t x1, y1;
   float i;
   float deg = 1.0;
@@ -500,6 +561,7 @@ void ESP32_LCD_ILI9341_SPI::Draw_Circle_Line(uint16_t x0, uint16_t y0, uint16_t 
       dummy_y = y1;
     }
   }
+  if(!_Hw_cs) digitalWrite(_cs, HIGH);
 }
 //***************************************
 void ESP32_LCD_ILI9341_SPI::Draw_Circle_Fill(uint16_t x0, uint16_t y0, uint16_t r, uint8_t red, uint8_t green, uint8_t blue){
