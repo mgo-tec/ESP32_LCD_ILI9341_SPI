@@ -22,7 +22,7 @@ This is a function to read font character by character and scroll (to save memor
 (1.1)  
 Corrected the argument uint8_t txt_length to uint16_t txt_length.      
   
-#【更新履歴】(Japanese)  
+# 【更新履歴】(Japanese)  
 (1.25)  
 - 8x16 又は 16x16ビットマップフォント表示の背景色を指定できるように、クラスの引数を追加しました。  
 - Draw_Pixel_65k_DotColor 関数が microSD カードと併用できなかったので、Draw_Pixel_65k_DotColor_sd 関数を追加しました。  
