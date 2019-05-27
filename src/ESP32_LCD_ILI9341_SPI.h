@@ -1,6 +1,6 @@
 /*
   ESP32_LCD_ILI9341_SPI.h - for Arduino core for the ESP32 ( Use SPI library ).
-  Beta version 1.25
+  Beta version 1.26
   
 The MIT License (MIT)
 

@@ -1,10 +1,13 @@
 # ESP32_LCD_ILI9341_SPI
 This is Arduino core for the ESP32 library ( SPI ).  
-Beta ver 1.25  
+Beta ver 1.26  
   
 Use SPI.h library  
   
 # Change log
+(1.26)  
+- Fixed LEDC related use in Brightness function.  
+  
 (1.25)  
 - Class argument was added so that background color of 8 x 16 or 16 x 16 bit map font display can be specified.  
 - he Draw_Pixel_65k_DotColor_sd function was added because the Draw_Pixel_65k_DotColor function could not be used with the microSD card.  
@@ -23,6 +26,9 @@ This is a function to read font character by character and scroll (to save memor
 Corrected the argument uint8_t txt_length to uint16_t txt_length.      
   
 # 【更新履歴】(Japanese)  
+(1.26)  
+- Brightness関数で使っている LEDC 関連を修正しました。  
+  
 (1.25)  
 - 8x16 又は 16x16ビットマップフォント表示の背景色を指定できるように、クラスの引数を追加しました。  
 - Draw_Pixel_65k_DotColor 関数が microSD カードと併用できなかったので、Draw_Pixel_65k_DotColor_sd 関数を追加しました。  

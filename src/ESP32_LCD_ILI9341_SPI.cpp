@@ -1,6 +1,6 @@
 /*
   ESP32_LCD_ILI9341_SPI.cpp - for Arduino core for the ESP32 ( Use SPI library ).
-  Beta version 1.25
+  Beta version 1.26
   
 The MIT License (MIT)
 
@@ -587,9 +587,7 @@ void ESP32_LCD_ILI9341_SPI::Draw_Circle_Fill(uint16_t x0, uint16_t y0, uint16_t 
 //********* LCD Display LED Brightness **************
 void ESP32_LCD_ILI9341_SPI::Brightness(uint8_t brightness){
   uint8_t ledc_ch = 0;
-  uint32_t valueMax = 255;
-  uint32_t duty = (8191 / valueMax) * min(brightness, valueMax);
-  ledcSetup(ledc_ch, 5000, 13);
+  ledcSetup(ledc_ch, 5000, 8);
   ledcAttachPin(_ledpin, 0);
-  ledcWrite(ledc_ch, duty);
+  ledcWrite(ledc_ch, brightness);
 }
