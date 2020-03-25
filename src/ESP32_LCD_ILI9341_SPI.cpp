@@ -1,6 +1,6 @@
 /*
   ESP32_LCD_ILI9341_SPI.cpp - for Arduino core for the ESP32 ( Use SPI library ).
-  Beta version 1.26
+  Beta version 1.27
   
 The MIT License (MIT)
 
@@ -57,6 +57,12 @@ void ESP32_LCD_ILI9341_SPI::ILI9341_Init(bool hwcs, uint32_t clk){
   _Hw_cs = hwcs;
   _freq = clk;
   _txt_H_max = _Max_Width_x / 8;
+  
+  //ILI9342C を判別するためのリセットピン読み取り
+  pinMode(_rst, INPUT_PULLDOWN);
+  delay(1);
+  mp_isIPS_lcd = digitalRead(_rst);
+  delay(1);
 
   pinMode(_rst, OUTPUT); //Set RESET pin
   pinMode(_dc, OUTPUT); //Set Data/Command pin
@@ -90,6 +96,13 @@ void ESP32_LCD_ILI9341_SPI::ILI9341_Init(bool hwcs, uint32_t clk){
   ESP32_LCD_ILI9341_SPI::CommandWrite(0x36); //MADCTL: Memory Access Control
     ESP32_LCD_ILI9341_SPI::DataWrite(0b0001000); //M5stack only. D3: BGR(RGB-BGR Order control bit )="1"
     //ESP32_LCD_ILI9341_SPI::DataWrite(0b00101000); //サインスマート 2.2インチ用。D3: BGR(RGB-BGR Order control bit )="1"
+  
+  if(mp_isIPS_lcd) {
+    ESP32_LCD_ILI9341_SPI::CommandWrite(0x21); //Display Inversion ON
+  }else{
+    ESP32_LCD_ILI9341_SPI::CommandWrite(0x20); //Display Inversion OFF
+  }
+  
   ESP32_LCD_ILI9341_SPI::CommandWrite(0x11); //Sleep OUT
   delay(10);
 
@@ -114,6 +127,97 @@ void ESP32_LCD_ILI9341_SPI::Disp_Rotation(uint8_t rot){
       _Max_Width_x = 240;
       _Max_Width_y = 320;
       break;
+    case 2: //M5stack 横表示、上下逆
+      b = 0b11001000;
+      _Max_Width_x = 320;
+      _Max_Width_y = 240;
+      break;
+    case 3: //M5stack 縦表示、上下逆
+      b = 0b01101000;
+      _Max_Width_x = 240;
+      _Max_Width_y = 320;
+      break;
+    //------------------------
+    case 4: //M5stack 横表示、左右反転
+      b = 0b01001000;
+      _Max_Width_x = 320;
+      _Max_Width_y = 240;
+      break;
+    case 5: //M5stack 縦表示、左右反転
+      b = 0b00101000;
+      _Max_Width_x = 240;
+      _Max_Width_y = 320;
+      break;
+    case 6: //M5stack 横表示、上下逆、左右反転
+      b = 0b10001000;
+      _Max_Width_x = 320;
+      _Max_Width_y = 240;
+      break;
+    case 7: //M5stack 縦表示、上下逆、左右反転
+      b = 0b11101000;
+      _Max_Width_x = 240;
+      _Max_Width_y = 320;
+      break;
+    //-------------------------------
+    case 8: //M5stack 横表示、デフォルト、上下反転
+      b = 0b10001000;
+      _Max_Width_x = 320;
+      _Max_Width_y = 240;
+      break;
+    case 9: //M5stack 縦表示、デフォルト、上下反転
+      b = 0b11101000;
+      _Max_Width_x = 240;
+      _Max_Width_y = 320;
+      break;
+    case 10: //M5stack 横表示、上下逆、上下反転
+      b = 0b01001000;
+      _Max_Width_x = 320;
+      _Max_Width_y = 240;
+      break;
+    case 11: //M5stack 縦表示、上下逆、上下反転
+      b = 0b00101000;
+      _Max_Width_x = 240;
+      _Max_Width_y = 320;
+      break;
+    //-------------------------------
+    case 12: //M5stack で表示変わらず
+      b = 0b00001100;
+      _Max_Width_x = 320;
+      _Max_Width_y = 240;
+      break;
+    case 13: //M5stack で表示変わらず
+      b = 0b00011000;
+      _Max_Width_x = 320;
+      _Max_Width_y = 240;
+      break;
+
+    //------------------------
+    case 250:
+      b = 0b00101000; //ESP32_mgo_tec bv1.0.69 HiLetgo 2.8", サインスマート販売のILI9341横正常表示
+      _Max_Width_x = 320;
+      _Max_Width_y = 240;
+      break;
+    case 251:
+      b = 0b10001000; //ESP32_mgo_tec bv1.0.69 HiLetgo 2.8", サインスマート販売のILI9341の縦方向表示
+      _Max_Width_x = 240;
+      _Max_Width_y = 320;
+      break;
+    case 252: //ESP32_mgo_tec bv1.0.69 HiLetgo 2.8"　横表示　上下逆
+      b = 0b11101000;
+      _Max_Width_x = 320;
+      _Max_Width_y = 240;
+      break;
+    case 253: //ESP32_mgo_tec bv1.0.69 HiLetgo 2.8"、 縦表示　上下逆
+      b = 0b01001000;
+      _Max_Width_x = 240;
+      _Max_Width_y = 320;
+      break;
+    case 254:
+      b = 0b00101000; //ESP32_mgo_tec bv1.0.71～ HiLetgo 2.8" 横正常表示
+      _Max_Width_x = 320;
+      _Max_Width_y = 240;
+      ESP32_LCD_ILI9341_SPI::dispInversionOn();
+      break;
     default:
       break;
   }
@@ -123,6 +227,26 @@ void ESP32_LCD_ILI9341_SPI::Disp_Rotation(uint8_t rot){
   ESP32_LCD_ILI9341_SPI::SPI_set_change();
   ESP32_LCD_ILI9341_SPI::CommandWrite(0x36); //MADCTL: Memory Access Control
     ESP32_LCD_ILI9341_SPI::DataWrite(b); //M5stack only. D3: BGR(RGB-BGR Order control bit )="1"
+  if(!_Hw_cs) digitalWrite(_cs, HIGH);
+}
+//********* Color bit Inversion ON ************
+void ESP32_LCD_ILI9341_SPI::dispInversionOn(){
+  ESP32_LCD_ILI9341_SPI::SPI_set_change();
+  if(mp_isIPS_lcd) {
+    ESP32_LCD_ILI9341_SPI::CommandWrite(0x20); //Display Inversion OFF
+  }else{
+    ESP32_LCD_ILI9341_SPI::CommandWrite(0x21); //Display Inversion ON
+  }
+  if(!_Hw_cs) digitalWrite(_cs, HIGH);
+}
+//********* Color bit Inversion OFF ************
+void ESP32_LCD_ILI9341_SPI::dispInversionOff(){
+  ESP32_LCD_ILI9341_SPI::SPI_set_change();
+  if(mp_isIPS_lcd) {
+    ESP32_LCD_ILI9341_SPI::CommandWrite(0x21); //Display Inversion ON
+  }else{
+    ESP32_LCD_ILI9341_SPI::CommandWrite(0x20); //Display Inversion OFF
+  }
   if(!_Hw_cs) digitalWrite(_cs, HIGH);
 }
 //********* 4wire SPI Data / Command write************

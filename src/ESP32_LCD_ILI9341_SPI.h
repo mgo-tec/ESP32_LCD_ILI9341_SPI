@@ -1,6 +1,6 @@
 /*
   ESP32_LCD_ILI9341_SPI.h - for Arduino core for the ESP32 ( Use SPI library ).
-  Beta version 1.26
+  Beta version 1.27
   
 The MIT License (MIT)
 
@@ -49,6 +49,7 @@ private:
   int8_t _ledpin;
 
   bool _Hw_cs;
+  bool mp_isIPS_lcd = false;
 
   uint32_t _freq;
 
@@ -91,6 +92,8 @@ public:
   void Disp_Rotation(uint8_t rot);
   void ILI9341_Init(uint32_t clk);
   void ILI9341_Init(bool hwcs, uint32_t clk);
+  void dispInversionOn();
+  void dispInversionOff();
   void CommandWrite(uint8_t b);
   void DataWrite(uint8_t b);
   void DataWrite16(uint16_t b);

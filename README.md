@@ -1,10 +1,15 @@
 # ESP32_LCD_ILI9341_SPI
 This is Arduino core for the ESP32 library ( SPI ).  
-Beta ver 1.26  
+Beta ver 1.27  
   
 Use SPI.h library  
   
 # Change log
+(1.27)  
+-Added support for new M5Stack IPS display automatic recognition.  
+-Increased the pattern of Disp_Rotation function.  
+-Added dispInversionOn and dispInversionOff functions.  
+  
 (1.26)  
 - Fixed LEDC related use in Brightness function.  
   
@@ -26,6 +31,11 @@ This is a function to read font character by character and scroll (to save memor
 Corrected the argument uint8_t txt_length to uint16_t txt_length.      
   
 # 【更新履歴】(Japanese)  
+(1.27)  
+- 新型M5Stack IPSディスプレイ自動認識に対応しました。  
+- Disp_Rotation関数のパターンを増やした。  
+- dispInversionOn関数、dispInversionOff関数を追加  
+  
 (1.26)  
 - Brightness関数で使っている LEDC 関連を修正しました。  
   
